@@ -1,19 +1,13 @@
-import { useEffect, useState } from "react";
-import "./App.css";
-import useDataStore from "./store/DataStore.jsx";
-import { List, ListItem, ListItemText, ListItemButton } from "@mui/material";
-import StudentList from "./components/StudentsList.jsx";
-import StudentGrades from "./components/StudentGrade.jsx";
-import ClassList from "./components/ClassList.jsx";
+import * as React from "react";
+import { useState, useEffect } from "react";
+import TeacherPage from "./pages/TeacherPage.jsx";
+import LoginPage from "./pages/LoginPage.jsx";
+import api from "./api/axios";
 
 function App() {
-  // const [selectedClassName, setSelectedClassName] = useState(null);
+  return <TeacherPage />;
 
-  return (
-    <>
-      <ClassList />
-    </>
-  );
+  // <LoginPage />
 }
 
 export default App;
