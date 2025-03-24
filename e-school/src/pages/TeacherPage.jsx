@@ -4,7 +4,7 @@ import { Box, useTheme, useMediaQuery } from "@mui/material";
 import AppNav from "../components/AppNav";
 import StudentList from "../components/StudentList";
 import GradesDisplay from "../components/GradesDisplay";
-import Drawer from "../components/StudentsDrawer";
+import StudentsDrawer from "../components/StudentsDrawer";
 
 const gradesBySubject = [
   {
@@ -71,6 +71,7 @@ const students = [
   "Tanuló 15",
   "Tanuló 16",
   "Tanuló 17",
+  "Tanuló 18",
 ];
 
 const classes = [
@@ -94,8 +95,10 @@ function TeacherPage(params) {
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const [selectedClass, setSelectedClass] = useState("");
-  const handleSelectedClass = (selectedClassName) =>
+  const handleSelectedClass = (selectedClassName) => {
     setSelectedClass(selectedClassName);
+    setSelectedStudent("");
+  };
 
   const [selectedStudent, setSelectedStudent] = useState("");
   const handleSelectedStudent = (selectedStudentName) =>
@@ -108,18 +111,30 @@ function TeacherPage(params) {
   return (
     <Box
       sx={{
-        width: "100vW",
+        width: "100vw",
         height: "100vh",
         display: "flex",
         flexDirection: "column",
       }}
     >
       <AppNav
+        students={students}
         classes={classes}
         onClassClick={(className) => handleSelectedClass(className)}
         onMenuClick={() => setDrawerOpen(true)}
         isMobile={isMobile}
       />
+
+      {isMobile && (
+        <StudentsDrawer
+          selectedClass={selectedClass}
+          onStudentClick={(studentName) => handleSelectedStudent(studentName)}
+          open={drawerOpen}
+          onClose={handleDrawerToggle}
+          students={students}
+        />
+      )}
+
       <Box
         sx={{
           position: "relative",
@@ -130,14 +145,15 @@ function TeacherPage(params) {
       >
         {!isMobile && selectedClass && (
           <StudentList
+            selectedClassName={selectedClass}
             onStudentClick={(studentName) => handleSelectedStudent(studentName)}
             students={students}
           />
         )}
         {selectedStudent && (
           <GradesDisplay
+            studentName={selectedStudent}
             gradesBySubject={gradesBySubject}
-            studentName={"Sehallselát Dömötör"}
           />
         )}
       </Box>

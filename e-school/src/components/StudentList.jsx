@@ -51,7 +51,7 @@ function StudentList({
           </ListSubheader>
           {students.map((student, index) => (
             <ListItemButton
-              onClick={(student) => onStudentClick(student)}
+              onClick={() => onStudentClick(student)}
               key={index}
               sx={{
                 "&:hover": {

@@ -1,5 +1,6 @@
 import * as React from "react";
 import { useState } from "react";
+import StudentDrawer from "../components/StudentsDrawer";
 import {
   Box,
   Typography,
@@ -16,8 +17,6 @@ function AppNav({
   onMenuClick,
   classes = [],
 }) {
-;
-
   return (
     <AppBar sx={{ width: "100vw", position: "sticky" }}>
       <Toolbar>
