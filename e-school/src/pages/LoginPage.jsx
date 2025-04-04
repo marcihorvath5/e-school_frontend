@@ -1,7 +1,28 @@
 import * as React from "react";
+import { useState } from "react";
 import { Box, Button, Paper, TextField, Typography } from "@mui/material";
+import { useNavigate } from "react-router-dom";
+import useDatastore from "../dataStore/DataStore";
 
-function LoginPage({ Email = "pelda@pelda.hu" }) {
+function LoginPage() {
+  const {token} = useDatastore()
+  const navigate = useNavigate();
+  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("");
+
+  const login = useDatastore((state) => state.login);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+
+      await login(email, password);
+      navigate("/teacher");
+    } catch (e) {
+      console.log("Hoppá valami hiba történt:", e);
+    }
+  };
+
   return (
     <Box
       sx={{
@@ -17,11 +38,31 @@ function LoginPage({ Email = "pelda@pelda.hu" }) {
         <Typography variant="h5" sx={{ textAlign: "center" }}>
           Bejelentkezés
         </Typography>
-        <TextField fullWidth label="Email" type="email" sx={{ mt: 2 }} />
-        <TextField fullWidth label="Jelszó" type="password" sx={{ mt: 1 }} />
-        <Button variant="contained" color="primary" fullWidth sx={{ mt: 2 }}>
-          Bejelentkezés
-        </Button>
+        <form onSubmit={handleSubmit}>
+          <TextField
+            onChange={(e) => setEmail(e.target.value)}
+            fullWidth
+            label="Email"
+            type="email"
+            sx={{ mt: 2 }}
+          />
+          <TextField
+            onChange={(e) => setPassword(e.target.value)}
+            fullWidth
+            label="Jelszó"
+            type="password"
+            sx={{ mt: 1 }}
+          />
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            fullWidth
+            sx={{ mt: 2 }}
+          >
+            Bejelentkezés
+          </Button>
+        </form>
       </Paper>
     </Box>
   );
