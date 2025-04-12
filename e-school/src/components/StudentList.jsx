@@ -4,13 +4,17 @@ import {
   ListSubheader,
   ListItemButton,
   ListItemText,
+  selectClasses,
 } from "@mui/material";
+import useDatastore from "../dataStore/DataStore";
 
-function StudentList({
-  onStudentClick = handleSelectedStudent(studentName),
-  selectedClassName,
-  students = [],
-}) {
+function StudentList() {
+  const { students, selectedClass, setSelectedStudentId } = useDatastore();
+
+  const handleOnStudentClick = (id) => {
+    setSelectedStudentId(id);
+  };
+
   return (
     <List
       sx={{
@@ -47,12 +51,12 @@ function StudentList({
               borderTop: 0,
             }}
           >
-            {selectedClassName}
+            {selectedClass}
           </ListSubheader>
-          {students.map((student, index) => (
+          {students.map((student) => (
             <ListItemButton
-              onClick={() => onStudentClick(student)}
-              key={index}
+              onClick={() => handleOnStudentClick(student.id)}
+              key={student.id}
               sx={{
                 "&:hover": {
                   backgroundColor: "primary.light",
@@ -61,7 +65,10 @@ function StudentList({
                 },
               }}
             >
-              <ListItemText primary={student} sx={{ p: 1 }} />
+              <ListItemText
+                primary={`${student.lastName} ${student.firstName}`}
+                sx={{ p: 1 }}
+              />
             </ListItemButton>
           ))}
         </ul>

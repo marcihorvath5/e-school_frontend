@@ -1,7 +1,8 @@
 import axios from "axios";
+import useDatastore from "../dataStore/DataStore";
 
 const api = axios.create({
-  baseURL: "http://172.20.10.4:5000/api/",
+  baseURL: "http://192.168.0.45:5001/api/",
 });
 
 api.interceptors.request.use(
@@ -30,7 +31,8 @@ api.interceptors.response.use(
     // Handle errors here
     // For example, handling 401 unauthorized
     if (error.response?.status === 401) {
-      // Handle unauthorized access
+      const store = useDatastore.getState();
+      store.logout();
     }
     return Promise.reject(error);
   }

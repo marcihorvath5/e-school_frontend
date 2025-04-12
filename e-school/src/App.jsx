@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useState, useEffect } from "react";
 import TeacherPage from "./pages/TeacherPage.jsx";
-import useDatastore from "./pages/TeacherPage.jsx";
+import useDatastore from "./dataStore/DataStore.js";
 import LoginPage from "./pages/LoginPage.jsx";
 import api from "./api/axios";
 import {
@@ -14,8 +14,26 @@ import {
 } from "react-router-dom";
 
 function AppContent() {
+  const setAuthenticated = useDatastore((state) => state.setIsAuthenticated);
+  const fetchClasses = useDatastore((state) => state.fetchClasses);
   const isAuthenticated = useDatastore((state) => state.isAuthenticated);
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      setAuthenticated(token);
+      const fetchData = async () => {
+        await fetchClasses();
+      };
+      fetchData();
+    }
+  }, []);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate("/");
+    }
+  }, [isAuthenticated]);
 
   return (
     <div>
@@ -23,7 +41,8 @@ function AppContent() {
         <Route path="/" element={<LoginPage />}></Route>
         <Route
           path="/teacher"
-          element={isAuthenticated ? <TeacherPage /> : <Navigate to={"/"} />}
+          element={<TeacherPage />}
+          // element={isAuthenticated ? <TeacherPage /> : <Navigate to={"/"} />}
         />
       </Routes>
     </div>

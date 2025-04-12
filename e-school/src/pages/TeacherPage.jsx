@@ -1,10 +1,11 @@
 import * as React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Box, useTheme, useMediaQuery } from "@mui/material";
 import AppNav from "../components/AppNav";
 import StudentList from "../components/StudentList";
 import GradesDisplay from "../components/GradesDisplay";
 import StudentsDrawer from "../components/StudentsDrawer";
+import useDataStore from "../dataStore/DataStore";
 
 const gradesBySubject = [
   {
@@ -25,27 +26,7 @@ const gradesBySubject = [
   },
   {
     subject: "Matematika",
-    grades: [
-      { value: 2 },
-      { value: 5 },
-      { value: 4 },
-      { value: 5 },
-      { value: 4 },
-      { value: 4 },
-      { value: 4 },
-      { value: 4 },
-      { value: 4 },
-      { value: 4 },
-      { value: 4 },
-      { value: 4 },
-      { value: 4 },
-      { value: 4 },
-      { value: 4 },
-      { value: 4 },
-      { value: 4 },
-      { value: 4 },
-      { value: 1 },
-    ],
+    grades: [],
   },
   {
     subject: "Történelem",
@@ -74,39 +55,21 @@ const students = [
   "Tanuló 18",
 ];
 
-const classes = [
-  "12.A",
-  "12.B",
-  "12.C",
-  "11.A",
-  "11.B",
-  "11.C",
-  "10.A",
-  "10.B",
-  "10.C",
-  "9.A",
-  "9.B",
-  "9.C",
-];
+const classes = ["12.A", "12.B", "12.C"];
 
 function TeacherPage(params) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const selectedClass = useDataStore((state) => state.selectedClass);
+  const selectedStudentId = useDataStore((state) => state.selectedStudentId);
 
-  const [selectedClass, setSelectedClass] = useState("");
-  const handleSelectedClass = (selectedClassName) => {
-    setSelectedClass(selectedClassName);
-    setSelectedStudent("");
-  };
+  useEffect(() => {}, [selectedClass]);
 
-  const [selectedStudent, setSelectedStudent] = useState("");
   const handleSelectedStudent = (selectedStudentName) =>
     setSelectedStudent(selectedStudentName);
 
   const handleDrawerToggle = () => setDrawerOpen(!drawerOpen);
-
-  console.log(drawerOpen);
 
   return (
     <Box
@@ -118,7 +81,6 @@ function TeacherPage(params) {
       }}
     >
       <AppNav
-        students={students}
         classes={classes}
         onClassClick={(className) => handleSelectedClass(className)}
         onMenuClick={() => setDrawerOpen(true)}
@@ -150,12 +112,7 @@ function TeacherPage(params) {
             students={students}
           />
         )}
-        {selectedStudent && (
-          <GradesDisplay
-            studentName={selectedStudent}
-            gradesBySubject={gradesBySubject}
-          />
-        )}
+        {selectedStudentId && <GradesDisplay />}
       </Box>
     </Box>
   );

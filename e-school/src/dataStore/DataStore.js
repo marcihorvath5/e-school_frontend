@@ -1,21 +1,75 @@
 import { create } from "zustand";
 import api from "..//api/axios";
+import { Logout } from "@mui/icons-material";
 
 const token = localStorage.getItem("accessToken");
-
-const useDatastore = create((set) => ({
+const useDatastore = create((set, get) => ({
   token,
   isAuthenticated: !!token,
+  setIsAuthenticated: (token) => {
+    set({ isAuthenticated: true, token: token });
+  },
+  classes: [],
+  students: [],
+  selectedClass: "",
+  selectedStudentId: "",
+  setSelectedStudentId: (id) => {
+    set({ selectedStudentId: id });
+    console.log(get().selectedStudentId);
+  },
+  subjects: [],
 
   login: async (email, password) => {
     try {
       const response = await api.post("user/login", { email, password });
-      if (response.accessToken) {
-        localStorage.setItem("accessToken", response.accessToken);
-        set((isAuthenticated = true), (token = response.accessToken));
+      if (response) {
+        localStorage.setItem("accessToken", response);
+        set({ isAuthenticated: true, token: response });
+        await get().fetchClasses();
       }
     } catch (e) {
-      console.log("Hoppá valami hiba történt:", e);
+      console.log(e);
+    }
+  },
+
+  logout: () => {
+    try {
+      localStorage.removeItem("accessToken");
+      set({ isAuthenticated: false, token: null });
+    } catch (e) {
+      console.log(error);
+    }
+  },
+
+  fetchClasses: async () => {
+    const response = await api.get("teacher/getClasses");
+    try {
+      set({ classes: response });
+    } catch (e) {
+      console.log(e);
+    }
+  },
+
+  fetchClassWithStudent: async (className) => {
+    const response = await api.get(`teacher/getClassByName?name=${className}`);
+    const sortedStudents = await response.students.sort((a, b) => {
+      const result = a.lastName.localeCompare(b.lastName);
+      return result !== 0 ? result : a.firstName.localeCompare(b.firstName);
+    });
+    const sortedSubjects = await response.subjects.sort((a, b) =>
+      a.localeCompare(b)
+    );
+
+    try {
+      set({
+        students: sortedStudents || [],
+        selectedClass: response.className,
+        subjects: sortedSubjects,
+        selectedStudentId: "",
+      });
+      console.log(localStorage.getItem("accessToken"));
+    } catch (e) {
+      console.log(e);
     }
   },
 }));

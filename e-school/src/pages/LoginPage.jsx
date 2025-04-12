@@ -1,23 +1,25 @@
 import * as React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Box, Button, Paper, TextField, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import useDatastore from "../dataStore/DataStore";
 
 function LoginPage() {
-  const {token} = useDatastore()
+  const { login, isAuthenticated } = useDatastore();
   const navigate = useNavigate();
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
 
-  const login = useDatastore((state) => state.login);
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/teacher");
+    }
+  }, [isAuthenticated]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-
       await login(email, password);
-      navigate("/teacher");
     } catch (e) {
       console.log("Hoppá valami hiba történt:", e);
     }

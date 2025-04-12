@@ -1,6 +1,8 @@
 import * as React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import StudentDrawer from "../components/StudentsDrawer";
+import useDatastore from "../dataStore/DataStore";
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   Typography,
@@ -11,12 +13,29 @@ import {
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 
-function AppNav({
-  onClassClick = handleSelectedClass(selectedClassName),
-  isMobile,
-  onMenuClick,
-  classes = [],
-}) {
+function AppNav({ isMobile, onMenuClick }) {
+  const classes = useDatastore((state) => state.classes);
+  const logout = useDatastore((state) => state.logout);
+  const fetchClassWithStudents = useDatastore(
+    (state) => state.fetchClassWithStudent
+  );
+
+  const handleLogout = (e) => {
+    try {
+      logout();
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  const handleClassSelect = async (className) => {
+    try {
+      await fetchClassWithStudents(className);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
   return (
     <AppBar sx={{ width: "100vw", position: "sticky" }}>
       <Toolbar>
@@ -26,7 +45,11 @@ function AppNav({
           </IconButton>
         )}
         <Typography sx={{ flexGrow: 1, ml: 1 }}>Tanári felület</Typography>
-        <Button variant="contained" sx={{ color: "inherit", mr: 1 }}>
+        <Button
+          onClick={handleLogout}
+          variant="contained"
+          sx={{ color: "inherit", mr: 1 }}
+        >
           Kijelentkezés
         </Button>
       </Toolbar>
@@ -47,15 +70,13 @@ function AppNav({
           },
         }}
       >
-        {classes.map((className) => (
+        {classes.map((item) => (
           <Button
-            onClick={() => {
-              onClassClick(className);
-            }}
-            key={className}
+            onClick={() => handleClassSelect(item.name)}
+            key={item.name}
             color="inherit"
           >
-            {className}
+            {item.name}
           </Button>
         ))}
       </Box>
