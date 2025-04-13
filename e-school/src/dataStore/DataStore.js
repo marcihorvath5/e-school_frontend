@@ -72,6 +72,26 @@ const useDatastore = create((set, get) => ({
       console.log(e);
     }
   },
+
+  deleteGrade: async (gradeId, studentId) => {
+    try {
+      await api.delete(
+        `teacher/deleteGrade?gradeId=${gradeId}&studentId=${studentId}`
+      );
+      set((state) => ({
+        students: state.students.map((student) => ({
+          ...student,
+          grades: student.grades.map((subjectGroup) => ({
+            ...subjectGroup,
+            grades: subjectGroup.grades.filter((g) => g.gradeId !== gradeId),
+          })),
+        })),
+      }));
+      console.log(get().students);
+    } catch (error) {
+      console.log(error);
+    }
+  },
 }));
 
 export default useDatastore;

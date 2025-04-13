@@ -1,6 +1,7 @@
 import * as React from "react";
-import { Box, Chip, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import useDataStore from "../dataStore/DataStore";
+import GradeChip from "./GradeChip";
 
 function GradesDisplay({ studentName }) {
   const subjects = useDataStore((state) => state.subjects);
@@ -39,7 +40,6 @@ function GradesDisplay({ studentName }) {
           const studentGrades = student.grades.filter(
             (s) => s.subjectName === subject
           );
-          console.log(studentGrades);
           const allGrades = studentGrades.flatMap((g) => g.grades);
           const sum = allGrades.reduce(
             (acc, grade) => grade.gradeValue + acc,
@@ -81,29 +81,10 @@ function GradesDisplay({ studentName }) {
                     },
                   }}
                 >
-                  {studentGrades.map((grades, index) =>
-                    grades.grades.map(
-                      (grade, index) => (
-                        console.log(allGrades),
-                        (
-                          <Chip
-                            key={index}
-                            label={grade.gradeValue}
-                            size="small"
-                            sx={{
-                              m: 1,
-                              backgroundColor:
-                                grade.gradeValue >= 4
-                                  ? "success.main"
-                                  : grade.Value === 3
-                                    ? "warning.main"
-                                    : "error.main",
-                              color: "white",
-                            }}
-                          />
-                        )
-                      )
-                    )
+                  {studentGrades.map((grades) =>
+                    grades.grades.map((grade) => (
+                      <GradeChip key={grade.gradeId} grade={grade} />
+                    ))
                   )}
                 </Box>
               }
