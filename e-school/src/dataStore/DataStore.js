@@ -9,6 +9,8 @@ const useDatastore = create((set, get) => ({
   setIsAuthenticated: (token) => {
     set({ isAuthenticated: true, token: token });
   },
+  loginError: null,
+  clearLoginError: () => set({ loginError: null }),
   classes: [],
   students: [],
   selectedClass: "",
@@ -21,23 +23,36 @@ const useDatastore = create((set, get) => ({
 
   login: async (email, password) => {
     try {
+      set({ loginError: null });
       const response = await api.post("user/login", { email, password });
-      if (response) {
-        localStorage.setItem("accessToken", response);
-        set({ isAuthenticated: true, token: response });
+      const token = typeof response === "string" ? response : response?.token;
+      if (token && token.length > 20) {
+        localStorage.setItem("accessToken", token);
+        set({ isAuthenticated: true, token });
         await get().fetchClasses();
+      } else {
+        set({ loginError: "Hibás email cím vagy jelszó." });
       }
     } catch (e) {
-      console.log(e);
+      set({ loginError: "Hibás email cím vagy jelszó." });
     }
   },
 
   logout: () => {
     try {
       localStorage.removeItem("accessToken");
-      set({ isAuthenticated: false, token: null });
+      set({
+        isAuthenticated: false,
+        token: null,
+        loginError: null,
+        classes: [],
+        students: [],
+        selectedClass: "",
+        selectedStudentId: "",
+        subjects: [],
+      });
     } catch (e) {
-      console.log(error);
+      console.log(e);
     }
   },
 
@@ -57,7 +72,7 @@ const useDatastore = create((set, get) => ({
       return result !== 0 ? result : a.firstName.localeCompare(b.firstName);
     });
     const sortedSubjects = await response.subjects.sort((a, b) =>
-      a.localeCompare(b)
+      a.name.localeCompare(b.name)
     );
 
     try {
@@ -70,6 +85,64 @@ const useDatastore = create((set, get) => ({
       console.log(localStorage.getItem("accessToken"));
     } catch (e) {
       console.log(e);
+    }
+  },
+
+  addGrade: async (studentId, subject, gradeValue) => {
+    try {
+      const newGrade = await api.post("teacher/AddGrade", null, {
+        params: {
+          value: gradeValue,
+          studentId,
+          teacherId: "6bc4243a-c080-43fe-8aa8-c0d811540258",
+          subjectId: subject.id,
+        },
+      });
+      set((state) => ({
+        students: state.students.map((student) => {
+          if (student.id !== studentId) return student;
+          const hasSubject = student.grades.some(
+            (g) => g.subjectName === subject.name
+          );
+          const grades = hasSubject
+            ? student.grades.map((subjectGroup) =>
+                subjectGroup.subjectName === subject.name
+                  ? {
+                      ...subjectGroup,
+                      grades: [...subjectGroup.grades, newGrade],
+                    }
+                  : subjectGroup
+              )
+            : [
+                ...student.grades,
+                { subjectName: subject.name, grades: [newGrade] },
+              ];
+          return { ...student, grades };
+        }),
+      }));
+    } catch (error) {
+      console.log("addGrade failed:", error.response?.data ?? error);
+    }
+  },
+
+  updateGrade: async (gradeId, newValue) => {
+    try {
+      await api.put("teacher/ModifyGrade", null, {
+        params: { gradeId, newValue },
+      });
+      set((state) => ({
+        students: state.students.map((student) => ({
+          ...student,
+          grades: student.grades.map((subjectGroup) => ({
+            ...subjectGroup,
+            grades: subjectGroup.grades.map((g) =>
+              g.gradeId === gradeId ? { ...g, gradeValue: newValue } : g
+            ),
+          })),
+        })),
+      }));
+    } catch (error) {
+      console.log("updateGrade failed:", error.response?.data ?? error);
     }
   },
 

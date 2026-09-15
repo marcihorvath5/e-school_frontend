@@ -1,11 +1,22 @@
 import * as React from "react";
 import { useState, useEffect } from "react";
-import { Box, Button, Paper, TextField, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  Paper,
+  TextField,
+  Typography,
+  Snackbar,
+  Alert,
+} from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import useDatastore from "../dataStore/DataStore";
 
 function LoginPage() {
-  const { login, isAuthenticated } = useDatastore();
+  const login = useDatastore((state) => state.login);
+  const isAuthenticated = useDatastore((state) => state.isAuthenticated);
+  const loginError = useDatastore((state) => state.loginError);
+  const clearLoginError = useDatastore((state) => state.clearLoginError);
   const navigate = useNavigate();
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
@@ -18,11 +29,7 @@ function LoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      await login(email, password);
-    } catch (e) {
-      console.log("Hoppá valami hiba történt:", e);
-    }
+    await login(email, password);
   };
 
   return (
@@ -66,6 +73,21 @@ function LoginPage() {
           </Button>
         </form>
       </Paper>
+      <Snackbar
+        open={!!loginError}
+        autoHideDuration={4000}
+        onClose={clearLoginError}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          onClose={clearLoginError}
+          severity="error"
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          {loginError}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

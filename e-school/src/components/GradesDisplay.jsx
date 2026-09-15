@@ -21,11 +21,22 @@ function GradesDisplay({ studentName }) {
   const subjects = useDataStore((state) => state.subjects);
   const students = useDataStore((state) => state.students);
   const selectedStudentId = useDataStore((state) => state.selectedStudentId);
+  const addGrade = useDataStore((state) => state.addGrade);
   const student = students.find((s) => s.id === selectedStudentId);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [newGradeValue, setNewGradeValue] = useState("");
-  const handleChange = (event) => {
-    setAge(event.target.value);
+  const [selectedSubject, setSelectedSubject] = useState(null);
+
+  const closeDialog = () => {
+    setDialogOpen(false);
+    setNewGradeValue("");
+    setSelectedSubject(null);
+  };
+
+  const handleAdd = async () => {
+    if (!newGradeValue || !selectedSubject) return;
+    await addGrade(selectedStudentId, selectedSubject, newGradeValue);
+    closeDialog();
   };
 
   return (
@@ -56,9 +67,9 @@ function GradesDisplay({ studentName }) {
             rowGap: 2,
           }}
         >
-          {subjects.map((subject, index) => {
+          {subjects.map((subject) => {
             const studentGrades = student.grades.filter(
-              (s) => s.subjectName === subject
+              (s) => s.subjectName === subject.name
             );
             const allGrades = studentGrades.flatMap((g) => g.grades);
             const sum = allGrades.reduce(
@@ -68,7 +79,7 @@ function GradesDisplay({ studentName }) {
             const avg = allGrades.length > 0 ? sum / allGrades.length : 0;
 
             return (
-              <React.Fragment key={index}>
+              <React.Fragment key={subject.id}>
                 <Box
                   sx={{
                     color: "black",
@@ -79,7 +90,7 @@ function GradesDisplay({ studentName }) {
                     p: 1,
                   }}
                 >
-                  {subject}
+                  {subject.name}
                 </Box>
 
                 <Box sx={{ display: "grid", gridTemplateColumns: "1fr auto" }}>
@@ -110,7 +121,10 @@ function GradesDisplay({ studentName }) {
                   </Box>
 
                   <IconButton
-                    onClick={() => setDialogOpen(true)}
+                    onClick={() => {
+                      setSelectedSubject(subject);
+                      setDialogOpen(true);
+                    }}
                     sx={{
                       border: 1,
                       borderColor: "divider",
@@ -139,8 +153,8 @@ function GradesDisplay({ studentName }) {
           })}
         </Box>
       </Box>
-      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)}>
-        <DialogTitle>Jegy felvitel</DialogTitle>
+      <Dialog open={dialogOpen} onClose={closeDialog}>
+        <DialogTitle>Jegy felvitel — {selectedSubject?.name}</DialogTitle>
         <DialogActions sx={{ display: "flex", flexDirection: "column" }}>
           <FormControl fullWidth>
             <InputLabel>Jegy</InputLabel>
@@ -154,12 +168,13 @@ function GradesDisplay({ studentName }) {
                   {n}
                 </MenuItem>
               ))}
-              ;
             </Select>
           </FormControl>
           <Box>
-            <Button>Mégsem</Button>
-            <Button>Hozzáad</Button>
+            <Button onClick={closeDialog}>Mégsem</Button>
+            <Button onClick={handleAdd} disabled={!newGradeValue}>
+              Hozzáad
+            </Button>
           </Box>
         </DialogActions>
       </Dialog>

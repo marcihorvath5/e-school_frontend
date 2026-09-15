@@ -38,11 +38,10 @@ function AppContent() {
   return (
     <div>
       <Routes>
-        <Route path="/" element={<LoginPage />}></Route>
+        <Route path="/" element={<LoginPage />} />
         <Route
           path="/teacher"
-          element={<TeacherPage />}
-          // element={isAuthenticated ? <TeacherPage /> : <Navigate to={"/"} />}
+          element={isAuthenticated ? <TeacherPage /> : <Navigate to="/" />}
         />
       </Routes>
     </div>

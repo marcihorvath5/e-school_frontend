@@ -8,6 +8,10 @@ import {
   DialogActions,
   DialogTitle,
   Button,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from "@mui/material";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined";
@@ -16,7 +20,23 @@ function GradeChip({ grade }) {
   const selectedStudentId = useDatastore((state) => state.selectedStudentId);
   const [hovered, setHovered] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editValue, setEditValue] = useState(grade.gradeValue);
   const deleteGrade = useDatastore((state) => state.deleteGrade);
+  const updateGrade = useDatastore((state) => state.updateGrade);
+
+  const openEditDialog = () => {
+    setEditValue(grade.gradeValue);
+    setEditDialogOpen(true);
+  };
+
+  const closeEditDialog = () => setEditDialogOpen(false);
+
+  const handleUpdate = async () => {
+    if (editValue === grade.gradeValue) return closeEditDialog();
+    await updateGrade(grade.gradeId, editValue);
+    closeEditDialog();
+  };
 
   return (
     <>
@@ -42,7 +62,7 @@ function GradeChip({ grade }) {
 
         {hovered && (
           <Box>
-            <IconButton>
+            <IconButton onClick={openEditDialog}>
               <EditOutlinedIcon fontSize="small" />
             </IconButton>
             <IconButton onClick={() => setDialogOpen(true)}>
@@ -64,6 +84,29 @@ function GradeChip({ grade }) {
           >
             Törlés
           </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog open={editDialogOpen} onClose={closeEditDialog}>
+        <DialogTitle>Jegy módosítása</DialogTitle>
+        <DialogActions sx={{ display: "flex", flexDirection: "column" }}>
+          <FormControl fullWidth>
+            <InputLabel>Jegy</InputLabel>
+            <Select
+              value={editValue}
+              label="Jegy"
+              onChange={(e) => setEditValue(e.target.value)}
+            >
+              {[1, 2, 3, 4, 5].map((n) => (
+                <MenuItem key={n} value={n}>
+                  {n}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <Box>
+            <Button onClick={closeEditDialog}>Mégse</Button>
+            <Button onClick={handleUpdate}>Mentés</Button>
+          </Box>
         </DialogActions>
       </Dialog>
     </>
